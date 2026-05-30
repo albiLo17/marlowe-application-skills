@@ -1,0 +1,88 @@
+OVERVIEW
+
+Title:
+SoTa: Soft Tactile Skins for Dexterous Manipulation
+
+One-sentence project description:
+SoTa develops low-cost, custom-fit but layout-aligned full-hand tactile skins for human and robot hands, enabling collection of paired bimanual visuo-tactile demonstrations and cross-embodiment co-training of policies for contact-rich dexterous manipulation tasks.
+
+Overleaf link for references:
+—
+
+The SoTa draft introduces 202-taxel tactile skins with the same semantic taxel layout across human and robot hands and evaluates their use for co-training on contact-rich tasks including box closing, cloth folding, pepper placement, cup picking, and board wiping. The current draft contains an internal inconsistency in dataset size: the abstract/introduction state approximately 6 hours, while the dataset analysis reports 1,039 episodes and approximately 2.5 hours; this should be reconciled before submission.  
+
+⸻
+
+JOB PROFILE
+
+GPU requirement: number and type of GPUs per job; GPUs per node; number of nodes.
+Provisional requirement inherited from the original proposal: most training experiments use 2–8 NVIDIA H100 GPUs per job, with a typical full training job using 8 H100 GPUs. Larger-scale pretraining or ablation campaigns may extend to multi-node runs with up to 16 GPUs total. GPUs per node: —. Number of nodes for 16-GPU runs: —.
+Note: these requirements were originally justified for 3–8B world/action models; applicability to the SoTa visuo-tactile Diffusion Policy must be confirmed.
+
+Wall time: expected runtime per experiment/job.
+Provisional estimate inherited from the original proposal: 12–36 hours per typical 8-GPU training job. Preliminary large-model profiling in the original proposal included a run reaching near convergence after approximately 3 days.
+
+Concurrency: typical and peak number of simultaneous jobs.
+Typical number of simultaneous jobs: —.
+Peak concurrency inherited from the original proposal: up to 16 concurrent jobs during intensive experimental phases.
+
+CPU and RAM needs: estimated CPU utilization/cores and memory per job.
+Provisional estimate inherited from the original proposal: CPU demand is expected to be modest relative to GPU demand, with an observed utilization of approximately 3% CPU on a GCP a3-highgpu-2g instance during preliminary training. Expected system memory requirement is approximately 64–128 GB RAM per job. Requested CPU core count: —.
+
+GPU memory/utilization: demonstrated or expected VRAM usage and GPU utilization.
+Provisional evidence inherited from the original proposal: preliminary H100 runs saturated approximately 80 GB VRAM per GPU and achieved approximately 86% GPU utilization in an example DreamZero training run. Expected utilization for scaled jobs is 80–100%, subject to confirmation on the final SoTa training pipeline.
+
+Storage and I/O: dataset size, where data will be loaded from, whether node-local storage is used, and expected I/O intensity during training.
+The SoTa dataset contains synchronized egocentric RGB observations, proprioceptive signals, and bilateral tactile readings at 30 Hz, with 202 taxels per hand. The current draft reports 770 human demonstrations and 269 robot demonstrations, for a total of 1,039 episodes, but the final total duration must be reconciled between the reported approximately 2.5 hours and 6 hours.  
+
+For scaled training and associated preprocessing, the original proposal estimates approximately 100 TB of scratch storage, covering raw and processed video data, intermediate artifacts, and model checkpoints. Data would be loaded from cluster scratch storage after direct download or transfer via SCP/rsync. Intermediate artifacts may include processed video shards, tactile/proprioceptive sequences, and model-ready training representations. Node-local storage usage: —. Expected I/O intensity: moderate to high during dataset preprocessing and video loading; primarily compute-bound during training.  
+
+Checkpointing: checkpoint size, save frequency, and whether jobs support pause/resume or restart.
+Provisional estimate inherited from the original proposal: each checkpoint is approximately 20 GB. Jobs are expected to be fully checkpoint-enabled and support restart/resume after interruption. Save frequency: regularly during training; exact interval not specified. Retention policy: retain the most recent and best-performing checkpoints while deleting unused intermediate artifacts.
+
+⸻
+
+COMPUTATIONAL READINESS AND TUNING STATUS
+
+Implementation status: whether the training pipeline is already running and tested.
+The SoTa draft specifies a visuo-tactile policy pipeline based on Diffusion Policy, taking as input egocentric RGB observations, proprioception, and 202-taxel tactile readings and producing wrist and finger action targets. The draft reports initial physical-robot evaluation results for cloth folding and pepper placement, indicating that at least part of the training and evaluation pipeline is operational. However, implementation completeness for all five tasks and all scaling studies remains to be confirmed.  
+
+The original computational proposal additionally reports an already implemented distributed training pipeline for DreamZero world/action model training, with preliminary runs executed and profiled. Its direct use for SoTa is — / to be confirmed.  
+
+Profiling evidence: any existing runs showing GPU utilization, VRAM usage, throughput, runtime, or scaling behavior.
+For the compute profile inherited from the original proposal, an example DreamZero training run on a GCP a3-highgpu-2g instance achieved approximately 86% GPU utilization, saturated approximately 80 GB H100 VRAM, and showed loss approaching convergence after approximately 3 days. No SoTa-specific profiling results for VRAM usage, throughput, runtime, or scaling behavior are reported in the current draft.
+
+Current hardware used: GPU type and number used in preliminary experiments.
+Original-proposal preliminary profiling hardware: GCP a3-highgpu-2g VM with NVIDIA H100 GPUs.
+SoTa-specific preliminary training hardware: —.
+
+Current experiment scale: dataset size, batch size, model size, and runtime from pilot runs.
+Dataset size: the SoTa draft currently reports 1,039 total episodes, comprising 770 human and 269 robot demonstrations, across five contact-rich tasks. Dataset duration is reported inconsistently as approximately 2.5 hours in the dataset analysis and approximately 6 hours elsewhere in the draft.  
+
+Batch size: —.
+Model size: — for the SoTa Diffusion Policy.
+Pilot-run runtime: — for SoTa.
+Inherited original-proposal model scale: 3–8B parameters for world/action model experiments, not yet demonstrated as the SoTa policy configuration.
+
+Training method: e.g., full fine-tuning, LoRA, distributed training strategy, mixed precision.
+SoTa-specific training method: training a visuo-tactile Diffusion Policy conditioned on RGB observations, proprioception, and full-hand tactile readings; the principal comparison varies the training data composition between robot-only, human-only, and human-plus-robot co-training. No learned tactile alignment, sensor adapter, or domain-translation module is used because the human and robot skins share an aligned taxel layout.  
+
+Distributed training strategy: —.
+Mixed precision: —.
+Full fine-tuning versus parameter-efficient fine-tuning: —.
+Inherited original-proposal infrastructure supports distributed multi-GPU training with PyTorch, CUDA 12, NCCL, and Hugging Face dependencies.
+
+Tuning status: hyperparameters already tuned or still to be optimized.
+The SoTa draft states that policy architecture and hyperparameters are held identical across the training-regime comparisons, but it does not specify which hyperparameters have already been tuned. Remaining tuning status: —. Relevant open experimental details include data-balancing or sampling ratios for human-plus-robot co-training, final task evaluation counts, and the scaling study that progressively adds 0%, 33%, 67%, and 100% of the human demonstrations under a fixed robot-data budget.
+
+MFU or efficiency: measured MFU, or expected MFU with a brief justification if not yet measured.
+Measured MFU: —.
+Available efficiency evidence inherited from the original proposal: preliminary H100 training runs achieved approximately 86% GPU utilization while saturating available VRAM, suggesting that the implementation can operate efficiently in a GPU-bound regime. A formal MFU measurement has not been reported.
+
+Scaling need: target dataset/model scale and why current resources are insufficient.
+For SoTa, the scientific scaling need is to evaluate whether increasing the quantity of aligned human visuo-tactile data improves robot-policy performance under a fixed robot-data budget, across multiple contact-rich dexterous tasks. The data collection approach is intended to make human tactile demonstrations substantially easier to scale than robot teleoperation.
+
+Under the inherited compute proposal, the longer-term scaling target includes training 3–8B parameter dexterous world/action models on large-scale human and robot video datasets. Current lab resources are insufficient because they do not provide adequate H100 availability, suffer from contention, and cannot reliably support multi-day, multi-GPU experimental campaigns with high-bandwidth inter-GPU communication.  
+
+Requested infrastructure benefit: what additional experiments or scale the requested compute will enable.
+Requested compute would enable systematic SoTa experiments across the full five-task evaluation suite, including robot-only, human-only, and human-plus-robot co-training regimes; scaling studies over increasing human-data fractions; repeat training runs and physical-robot evaluations; and, subject to final architecture decisions, larger visuo-tactile or world/action model experiments using aligned human and robot tactile demonstrations. Access to H100-class multi-GPU nodes would additionally reduce training turnaround time, support concurrent ablations, and provide stable execution for longer-running training campaigns.

@@ -1,0 +1,16 @@
+
+Our required num hours for the compute is as follows, if we only use H100 GPUs (let’s say we write this in the proposal):
+
+we have 7 methods (robot only 50 demos, robot only 75 demos, human only, R + H 50, R + H 100, R + H 150, robot only but replace tactile with noise).
+let’s say we have 10 tasks (okay to overestimate a bit for the proposal)
+each job takes 3 days to run (if we put one run per slurm job, it’s much faster, but if you put in 7 jobs per gpu, it’s going to be much slower)
+then, we have: one round of job takes 1 H100 GPU/7-methods * 10 tasks * 3 days = 720 hours of compute.
+we can say for experiments we will need to iterate on data and retrain. so let’s say we want about 5 iterations of these. This gives 720 * 5 = 3600 hours of compute.
+now, we can select to say, we want to do an additional experiment to see if non-task-specific human data helps. For this, we will mix robot data with task-specific and in-the-wild human data. This gives us additional 1 H100 GPU/7-methods * 10 tasks * 3 days = 720 hours (and we can multiply this by number of iterations). In this way we can claim more hours.
+
+
+
+
+Regarding the images we obtained the plots of GPU usage and power consumption and training loss using RTX 6000 GPUs. These GPUs have 50GB GPU memory
+And we put 4 jobs on this GPU for plotting this plot
+So you can claim that for H100s we can parallelize 7 jobs per GPU.
